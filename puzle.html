@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feliz cumpleaños</title>
+    <link rel="stylesheet" href="puzle.css">
+</head>
+<body>
+    <div class="matrix-rain" id="matrixRain"></div>
+    
+    <div class="konami-indicator" id="konamiIndicator">
+        Secuencia Konami: <span id="konamiSequence"></span>
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="title">Feliz cumpleaños</h1>
+            <p class="subtitle">Demuestra que vales para conseguir tu regalo</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <!-- NIVEL 1 -->
+        <!-- La primera clave es "FREDDY" -->
+        <div class="level-container active" id="level1">
+            <h2 class="level-title">NIVEL 1</h2>
+            <div class="hint">
+                🔍 ¿Aún sabes de HTML? Encuentra la clave escondida
+            </div>
+            <div class="input-group">
+                <input type="text" class="input-field" id="level1Input" placeholder="INGRESA LA CLAVE">
+                <br>
+                <button class="btn" onclick="checkLevel1()">VERIFICAR</button>
+            </div>
+            <div id="level1Result"></div>
+        </div>
+        
+        <!-- NIVEL 2: Cifrado César -->
+        <div class="level-container" id="level2">
+            <h2 class="level-title">NIVEL 2: CIFRADO CÉSAR</h2>
+            <div class="hint">
+                ROT13
+                <br><br>
+                <strong style="color: #00ff41; font-family: 'Courier Prime', monospace;">
+                "Xn oxniq qf Xqb
+                </strong>
+            </div>
+            <div class="input-group">
+                <input type="text" class="input-field" id="level2Input" placeholder="MENSAJE DESCIFRADO">
+                <br>
+                <button class="btn" onclick="checkLevel2()">DESCIFRAR</button>
+            </div>
+            <div id="level2Result"></div>
+        </div>
+        
+        <!-- NIVEL 3: Secuencia Konami -->
+        <div class="level-container" id="level3">
+            <h2 class="level-title">NIVEL 3: SECUENCIA KONAMI</h2>
+            <div class="input-group">
+                <p>Ingresa la secuencia ahora:</p>
+                <div id="sequenceDisplay" style="font-family: 'Courier Prime', monospace; font-size: 1.2rem; margin: 10px 0;"></div>
+            </div>
+            <div id="level3Result"></div>
+        </div>
+        
+        <!-- NIVEL 4: Puzzle de símbolos -->
+        <div class="level-container" id="level4">
+            <h2 class="level-title">NIVEL 4: SÍMBOLOS</h2>
+            <div class="hint">
+                🧩 ¿De quién es el cumpleaños?
+            </div>
+            <div class="cipher-grid" id="cipherGrid">
+                <div class="cipher-cell" data-letter="N">⚡</div>
+                <div class="cipher-cell" data-letter="O">🔴</div>
+                <div class="cipher-cell" data-letter="P">🔍</div>
+                <div class="cipher-cell" data-letter="X">❌</div>
+                <div class="cipher-cell" data-letter="A">⭕</div>
+                <div class="cipher-cell" data-letter="Z">🐱‍👓</div>
+                <div class="cipher-cell" data-letter="I">🏠</div>
+                <div class="cipher-cell" data-letter="B">👁</div>
+                <div class="cipher-cell" data-letter="R">🔒</div>
+                <div class="cipher-cell" data-letter="Y">🌟</div>
+            </div>
+            <div class="input-group">
+                <p>Secuencia actual: <span id="symbolSequence" style="font-family: 'Courier Prime', monospace;"></span></p>
+                <button class="btn" onclick="resetSymbols()">REINICIAR</button>
+                <button class="btn" onclick="checkLevel4()">VERIFICAR</button>
+            </div>
+            <div id="level4Result"></div>
+        </div>
+        
+        <!-- NIVEL 5: Botón invisible -->
+        <div class="level-container" id="level5">
+            <h2 class="level-title">NIVEL 5: LO INVISIBLE</h2>
+            <div class="hint">
+                👻 Hay un botón invisible en algún lugar de esta pantalla.
+            </div>
+            <div class="invisible-button" onclick="checkLevel5()"></div>
+            <div id="level5Result"></div>
+        </div>
+        
+        <!-- NIVEL FINAL -->
+        <div class="level-container" id="levelFinal">
+            <h2 class="level-title">🎉 FELICIDADES! 🎉</h2>
+            <div class="success">
+                <h3>¡BIEN HECHO!</h3>
+                <p>Solo te queda un paso más</p>
+               <button class="btn" onclick="openModal()">Último puzle</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <img src="./key.jpg" alt="Último puzle" class="modal-image">
+        </div>
+    </div>
+    
+    <!-- Elementos ocultos para pistas -->
+    <div class="hidden-element">
+        <!-- PISTA OCULTA: Para el nivel 2, busca "ROT13" en Google -->
+        <!-- PISTA OCULTA: La secuencia Konami es: UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT B A -->
+    </div>
+    
+    <script>
+        let currentLevel = 1;
+        let konamiSequence = [];
+        let konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'KeyB', 'KeyA'];
+        let symbolSequence = [];
+        let targetSymbols = ['R', 'O', 'B', 'I', 'N'];
+        
+        // Inicializar la lluvia de Matrix
+        function initMatrixRain() {
+            const matrixRain = document.getElementById('matrixRain');
+            const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            
+            for (let i = 0; i < 50; i++) {
+                const column = document.createElement('div');
+                column.className = 'matrix-column';
+                column.style.left = Math.random() * 100 + '%';
+                column.style.animationDelay = Math.random() * 10 + 's';
+                column.style.animationDuration = (Math.random() * 10 + 5) + 's';
+                
+                let columnText = '';
+                for (let j = 0; j < 20; j++) {
+                    columnText += characters.charAt(Math.floor(Math.random() * characters.length)) + '<br>';
+                }
+                column.innerHTML = columnText;
+                matrixRain.appendChild(column);
+            }
+        }
+        
+        // Actualizar barra de progreso
+        function updateProgress() {
+            const progress = (currentLevel - 1) / 5 * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+        
+        // Mostrar nivel específico
+        function showLevel(level) {
+            document.querySelectorAll('.level-container').forEach(container => {
+                container.classList.remove('active');
+            });
+            document.getElementById(`level${level}`).classList.add('active');
+            updateProgress();
+        }
+        
+        // NIVEL 1: Verificar código fuente
+        function checkLevel1() {
+            const input = document.getElementById('level1Input').value.toUpperCase();
+            const result = document.getElementById('level1Result');
+            
+            if (input === 'FREDDY') {
+                result.innerHTML = '<div class="success">¡Correcto! Has encontrado la primera clave. Accediendo al siguiente nivel...</div>';
+                setTimeout(() => {
+                    currentLevel = 2;
+                    showLevel(2);
+                }, 2000);
+            } else {
+                result.innerHTML = '<div class="error">Incorrecto. Busca más cuidadosamente en el código fuente...</div>';
+            }
+        }
+        
+        // NIVEL 2: Cifrado César ROT13
+        function checkLevel2() {
+            const input = document.getElementById('level2Input').value.toUpperCase();
+            const result = document.getElementById('level2Result');
+            
+            // "Xn oxniq qf Xqb"
+            if (input === 'LEO') {
+                result.innerHTML = '<div class="success">¡Excelente! Has descifrado el mensaje. Preparándote para el siguiente desafío...</div>';
+                setTimeout(() => {
+                    currentLevel = 3;
+                    showLevel(3);
+                    initKonamiListener();
+                }, 2000);
+            } else {
+                result.innerHTML = '<div class="error">Incorrecto. Recuerda: ROT13 desplaza cada letra 13 posiciones en el alfabeto.</div>';
+            }
+        }
+        
+        // NIVEL 3: Secuencia Konami
+        function initKonamiListener() {
+            document.addEventListener('keydown', handleKonamiInput);
+            document.getElementById('konamiIndicator').style.display = 'block';
+        }
+        
+        function handleKonamiInput(event) {
+            if (currentLevel !== 3) return;
+            
+            konamiSequence.push(event.code);
+            updateKonamiDisplay();
+            
+            if (konamiSequence.length > konamiCode.length) {
+                konamiSequence = konamiSequence.slice(-konamiCode.length);
+            }
+            
+            if (konamiSequence.length === konamiCode.length) {
+                if (JSON.stringify(konamiSequence) === JSON.stringify(konamiCode)) {
+                    checkLevel3();
+                } else {
+                    konamiSequence = [];
+                    updateKonamiDisplay();
+                }
+            }
+        }
+        
+        function updateKonamiDisplay() {
+            const display = konamiSequence.map(code => {
+                switch(code) {
+                    case 'ArrowUp': return '↑';
+                    case 'ArrowDown': return '↓';
+                    case 'ArrowLeft': return '←';
+                    case 'ArrowRight': return '→';
+                    case 'KeyB': return 'B';
+                    case 'KeyA': return 'A';
+                    default: return code;
+                }
+            }).join(' ');
+            
+            document.getElementById('sequenceDisplay').textContent = display;
+            document.getElementById('konamiSequence').textContent = display;
+        }
+        
+        function checkLevel3() {
+            const result = document.getElementById('level3Result');
+            result.innerHTML = '<div class="success">¡Bien hecho!. Accediendo al nivel 4...</div>';
+            document.removeEventListener('keydown', handleKonamiInput);
+            document.getElementById('konamiIndicator').style.display = 'none';
+            setTimeout(() => {
+                currentLevel = 4;
+                showLevel(4);
+                initSymbolPuzzle();
+            }, 2000);
+        }
+        
+        // NIVEL 4: Puzzle de símbolos
+        function initSymbolPuzzle() {
+            const cells = document.querySelectorAll('.cipher-cell');
+            cells.forEach(cell => {
+                cell.addEventListener('click', handleSymbolClick);
+            });
+        }
+        
+        function handleSymbolClick(event) {
+            const letter = event.target.dataset.letter;
+            symbolSequence.push(letter);
+            event.target.classList.add('selected');
+            updateSymbolDisplay();
+            
+            if (symbolSequence.length === targetSymbols.length) {
+                setTimeout(checkLevel4, 500);
+            }
+        }
+        
+        function updateSymbolDisplay() {
+            document.getElementById('symbolSequence').textContent = symbolSequence.join('');
+        }
+        
+        function resetSymbols() {
+            symbolSequence = [];
+            updateSymbolDisplay();
+            document.querySelectorAll('.cipher-cell').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+        }
+        
+        function checkLevel4() {
+            const result = document.getElementById('level4Result');
+            
+            if (JSON.stringify(symbolSequence) === JSON.stringify(targetSymbols)) {
+                result.innerHTML = '<div class="success">¡Perfecto! Sabes escribir tu nombre. Último nivel cargando...</div>';
+                setTimeout(() => {
+                    currentLevel = 5;
+                    showLevel(5);
+                }, 2000);
+            } else {
+                result.innerHTML = '<div class="error">Secuencia incorrecta. Inténtalo de nuevo.</div>';
+                setTimeout(resetSymbols, 1000);
+            }
+        }
+        
+        // NIVEL 5: Botón invisible
+        function checkLevel5() {
+            const result = document.getElementById('level5Result');
+            result.innerHTML = '<div class="success">¡Increíble! Has encontrado el botón invisible. ¡Completando el enigma!</div>';
+            setTimeout(() => {
+                currentLevel = 6;
+                showLevel('Final');
+            }, 2000);
+        }
+        
+        // Reiniciar el juego
+        function restartGame() {
+            currentLevel = 1;
+            konamiSequence = [];
+            symbolSequence = [];
+            
+            // Limpiar inputs
+            document.getElementById('level1Input').value = '';
+            document.getElementById('level2Input').value = '';
+            document.getElementById('sequenceDisplay').textContent = '';
+            document.getElementById('symbolSequence').textContent = '';
+            
+            // Limpiar resultados
+            document.querySelectorAll('[id$="Result"]').forEach(result => {
+                result.innerHTML = '';
+            });
+            
+            // Reiniciar símbolos
+            resetSymbols();
+            
+            // Mostrar primer nivel
+            showLevel(1);
+        }
+        
+        // Inicializar cuando se carga la página
+        window.addEventListener('load', () => {
+            initMatrixRain();
+            updateProgress();
+        });
+        
+        // Easter egg: doble clic en el título
+        document.querySelector('.title').addEventListener('dblclick', () => {
+            alert('Holi');
+        });
+        
+        // Prevenir clic derecho (añade misterio)
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            alert('¿Pensabas que sería tan fácil de entrar al código fuente? Busca otra manera...');
+        });
+
+        function openModal() {
+            document.getElementById('imageModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // Cerrar modal al hacer clic fuera de él
+        window.onclick = function(event) {
+            const modal = document.getElementById('imageModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
+        // Cerrar modal con la tecla Escape
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

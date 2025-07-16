@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Feliz Cumpleaños!</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <div class="balloons">
+        <div class="balloon">🎈</div>
+        <div class="balloon">🐇</div>
+        <div class="balloon">🐰</div>
+        <div class="balloon">🐷</div>
+    </div>
+    
+    <div class="sparkles" id="sparkles"></div>
+    
+    <div class="container">
+        <div class="birthday-card">
+            <h1 class="main-title">¡Feliz Cumpleaños Robinsite!</h1>
+            <p class="subtitle">Pero el puzle aún no ha acabado</p>
+            
+            <div class="cake-container">
+                <a class="cake" href="./puzle.html">🎂</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Crear chispas aleatoriamente
+        function crearChispas() {
+            const sparklesContainer = document.getElementById('sparkles');
+            
+            for (let i = 0; i < 20; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.innerHTML = '✨';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.animationDelay = Math.random() * 2 + 's';
+                sparklesContainer.appendChild(sparkle);
+            }
+        }
+        
+        // Crear confeti
+        function crearConfeti() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#ff9ff3', '#54a0ff'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 3 + 's';
+                confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                document.body.appendChild(confetti);
+                
+                // Remover confeti después de la animación
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+        
+        // Función para celebrar al hacer clic en el pastel
+        function celebrar() {
+            crearConfeti();
+            
+            // Reproducir sonido de celebración (emoji)
+            const cake = document.querySelector('.cake');
+            cake.style.animation = 'none';
+            cake.offsetHeight; // Trigger reflow
+            cake.style.animation = 'cakeGlow 0.5s ease-in-out, bounce 1s ease-in-out';
+            
+            // Mostrar mensaje de celebración
+            setTimeout(() => {
+                alert('🎉 ¡Felicidades! ¡Que se cumplan todos tus deseos! 🎉');
+            }, 500);
+        }
+        
+        // Inicializar efectos al cargar la página
+        window.addEventListener('load', () => {
+            crearChispas();
+            
+            // Crear confeti inicial después de 3 segundos
+            setTimeout(() => {
+                crearConfeti();
+            }, 3000);
+        });
+        
+        // Efecto de cursor personalizado
+        document.addEventListener('mousemove', (e) => {
+            const sparkle = document.createElement('div');
+            sparkle.innerHTML = '🟪';
+            sparkle.style.position = 'fixed';
+            sparkle.style.left = e.clientX + 'px';
+            sparkle.style.top = e.clientY + 'px';
+            sparkle.style.pointerEvents = 'none';
+            sparkle.style.color = '#f9ca24';
+            sparkle.style.fontSize = '12px';
+            sparkle.style.zIndex = '1000';
+            sparkle.style.animation = 'sparkle 1s ease-out forwards';
+            document.body.appendChild(sparkle);
+            
+            setTimeout(() => {
+                sparkle.remove();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
